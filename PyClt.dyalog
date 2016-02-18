@@ -34,29 +34,36 @@
           z←#.DRC.Close CONN
       :EndIf
     ∇
-    
-    ∇ r←P expr
-      :Access Public Instance
-      r←X'print(',expr,')'
+      
+                      
+    ∇ r←DMX
+    ⍝ Re-signallable DMX
+      r←⊂'EN' 'EM' 'Message',⍪⎕DMX.(EN EM Message)
     ∇
-   
    
     ∇ r←Call(fn arg);ns
       :Access Public Instance
       (ns←⎕NS'').(fn arg)←(,fn)arg
-      r←'1'do toJSON ns
+      :Trap 0 ⋄ r←'1'do toJSON ns
+      :Else ⋄ ⎕SIGNAL DMX
+      :EndTrap
     ∇
     
     ∇ r←Eval expr;ns
       :Access Public Instance
       (ns←⎕NS'').expr←expr
-      r←'0'do toJSON ns
+      :Trap 0 ⋄ r←'0'do toJSON ns
+      :Else ⋄ ⎕SIGNAL DMX
+      :EndTrap
     ∇
     
     ∇ r←Exec expr;ns
       :Access Public Instance
       (ns←⎕NS'').expr←expr
-      r←'X'do toJSON ns
+     
+      :Trap 0 ⋄ r←'X'do toJSON ns
+      :Else ⋄ ⎕SIGNAL DMX
+      :EndTrap
     ∇
     
 
