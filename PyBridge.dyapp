@@ -1,0 +1,5 @@
+﻿// Load pieces of the Python Bridge
+Load APLProcess
+Load PyClt
+Load Blender
+Run Blender.Init
