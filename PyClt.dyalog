@@ -10,11 +10,9 @@
     ∇ Default
       :Implements Constructor
       :Access Public
-      Connect 5000
     ∇
 
     ∇ Connect port;z
-      :Implements Constructor 
       :Access Public
      
       :If ~0=⊃z←#.DRC.Init''
@@ -34,27 +32,41 @@
           z←#.DRC.Close CONN
       :EndIf
     ∇
-      
-                      
+                           
     ∇ r←DMX
     ⍝ Re-signallable DMX
       r←⊂'EN' 'EM' 'Message',⍪⎕DMX.(EN EM Message)
     ∇
    
-    ∇ r←Call(fn arg);ns
+    ∇ r←Invoke args;ns;fn
       :Access Public Instance
-      (ns←⎕NS'').(fn arg)←(,fn)arg
-      :Trap 0 ⋄ r←'1'do toJSON ns
+      fn←⊃args ⋄ args←1↓args
+      'No more than 3 args'⎕SIGNAL(3<≢args)/11
+      (ns←⎕NS'').(fn args)←(,fn)args
+      :Trap 0 ⋄ r←(⍕≢args)do toJSON ns
       :Else ⋄ ⎕SIGNAL DMX
       :EndTrap
     ∇
     
+    ∇ r←Assign(name value)
+      :Access Public Instance
+     
+      (ns←⎕NS'').(name value)←(,name)value
+      :Trap 0 ⋄ r←'A'do toJSON ns
+      :Else ⋄ ⎕SIGNAL DMX
+      :EndTrap
+    ∇
+
     ∇ r←Eval expr;ns
       :Access Public Instance
       (ns←⎕NS'').expr←expr
       :Trap 0 ⋄ r←'0'do toJSON ns
       :Else ⋄ ⎕SIGNAL DMX
       :EndTrap
+     
+      :If 9=⎕NC'r'
+          r.⎕DF'[Python: ',expr,']'
+      :EndIf
     ∇
     
     ∇ r←Exec expr;ns
@@ -66,7 +78,6 @@
       :EndTrap
     ∇
     
-
     ∇ r←cmd do json;z;done;ns;json;len
       ⍝ Execute a Python expression and return the result
      

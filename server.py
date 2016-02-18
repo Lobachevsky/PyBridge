@@ -1,23 +1,35 @@
 #!/usr/bin/env python3
 import socketserver, socket, sys, io, traceback, struct, json
-import fns # module whose functions to expose; you can replace this with "import anothermodule as fns"
 
 class H(socketserver.BaseRequestHandler):
 
-    def runit(self, h):
+    PyBridgeContext={}
+        
+    def runit(self, cmd, h):
         try:
-            return(getattr(fns, h['fn'])(h['arg']))
+            ctx = self.PyBridgeContext
+            if cmd == 'X':   # exec
+                result = exec(h['expr'], ctx)
+            elif cmd == '0': # eval
+                result = eval(h['expr'], ctx)
+            elif cmd == 'A': # assign
+                ctx['PyBridgeTemp']=h['value']
+                result = exec(h['name']+'=PyBridgeTemp', ctx)
+                del ctx['PyBridgeTemp']
+            elif cmd == '1': # monadic
+                result = getattr(globals(), h['fn'])(h['args'][0])
+                
+            result=self.serializeit(result)
+            return(result)
         except:
-            result = "1Python Error"
-            traceback.print_exc()
-            print(result)
+            result = "E" + traceback.format_exc()
             return(result)
 
     def serializeit(self, result):
         try:
             return("0" + json.dumps(result))
         except:
-            r = "2JSON Serialization failed, repr: " + repr(result)
+            r = "1" + repr(result)
             traceback.print_exc()
             print(r)
             return(r)
@@ -27,10 +39,10 @@ class H(socketserver.BaseRequestHandler):
             b = self.request.recv(8, socket.MSG_WAITALL)
             if not b: break
             n = struct.unpack('>Q', b)[0] # n:number of bytes in JSON string, big-endian 8-byte integer
+            cmd = str(self.request.recv(1, socket.MSG_WAITALL), 'utf8') # type of request
             h = json.loads(str(self.request.recv(n, socket.MSG_WAITALL), 'utf8')) # h:parsed JSON string
-            print('h:' + repr(h))
-            r = self.runit(h)
-            r = self.serializeit(r)				
+            print('cmd: ' + cmd + ', h:' + repr(h))
+            r = self.runit(cmd, h)			
             r = bytes(r, "utf8")
             
             self.request.sendall(struct.pack('>Q', len(r)))

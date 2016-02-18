@@ -28,8 +28,10 @@
       Start(ws cmd rt)
     ∇
 
-    ∇ Start(ws args rt);psi;pid
+    ∇ Start(ws args rt);psi;pid;isAPL
       (Ws Args)←ws args
+      isAPL←Ws≢'' ⍝ Is it an APL process?
+     
       :If 0≠⍴RIDE_CONNECT
           args←args,' RIDE_CONNECT=',RIDE_CONNECT
       :EndIf
@@ -43,11 +45,11 @@
    ⍝   ws,←rt/' salt'  ⍝ if runtime, load the salt workspace first, which will subsequently load the target workspace
       :If IsWin
           ⎕USING←'System,System.dll'
-          psi←⎕NEW Diagnostics.ProcessStartInfo,⊂Exe(ws,' ',args)
+          psi←⎕NEW Diagnostics.ProcessStartInfo,⊂Exe((isAPL/ws,' '),args)
           psi.WindowStyle←Diagnostics.ProcessWindowStyle.Minimized
           Proc←Diagnostics.Process.Start psi
       :Else ⍝ Unix
-          pid←_SH'{ ',args,' ',Exe,' +s ',ws,' -c APLppid=',(⍕GetCurrentProcessId),' </dev/null >/dev/null 2>&1 & } ; echo $!'
+          pid←_SH'{ ',args,' ',Exe,isAPL/' +s ',ws,' -c APLppid=',(⍕GetCurrentProcessId),' </dev/null >/dev/null 2>&1 & } ; echo $!'
           Proc.Id←pid
           Proc.HasExited←HasExited
           Proc.StartTime←⎕NEW Time ⎕TS
