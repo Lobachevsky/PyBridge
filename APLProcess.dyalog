@@ -63,7 +63,7 @@
 
     ∇ WaitForKill(limit interval);count
       :If (0≠⍴onExit)∧~HasExited ⍝ If the process is still alive
-          :Trap 0 ⋄ ⍎onExit :EndTrap ⍝ Try this
+          :Trap 0 ⋄ ⍎onExit ⋄ :EndTrap ⍝ Try this
      
           count←0
           :While ~HasExited

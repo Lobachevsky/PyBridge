@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import socketserver, socket, sys, io, traceback, struct, json
+import socketserver, socket, sys, io, traceback, struct, json, threading
 
 class H(socketserver.BaseRequestHandler):
 
@@ -48,4 +48,7 @@ class H(socketserver.BaseRequestHandler):
             self.request.sendall(struct.pack('>Q', len(r)))
             self.request.sendall(r)
 
-socketserver.TCPServer(('', 5000), H).serve_forever()
+    def main():
+        socketserver.TCPServer(('', 5000), H).serve_forever()
+
+threading.Thread(target=H.main).start()
