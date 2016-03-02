@@ -1,26 +1,33 @@
-﻿:Class Blender : PyClt      
+﻿:Class Bender : PyClt      
 
     ⎕IO←⎕ML←1   ⍝ Very Ordinary
 
-    :Field Public BlenderEXE←'C:\Program Files\Blender Foundation\Blender\blender.exe'
-    :Field Public ServerScript←'c:\devt\PyBridge\server.py'
-    :Field Public BlenderProc←⎕NS ''
 
     ∇ Init
       :Access Public Shared
-     
-      :If 0=⎕NC'#.DRC'
-          'DRC'#.⎕CY'conga.dws'
-          ⎕←'DRC copied form conga.dws'
+      
+      :If 0=⎕NC '#.DRC' 
+          'DRC' #.⎕CY 'conga.dws' 
+          ⎕←'DRC copied from conga.dws' 
+      :EndIf
+
+      :If 9≠⎕NC '#.APLProcess'
+          ∘∘∘
+          ⎕←'APLProcess class is not present - will not be unable to launch Blender'
       :EndIf
     ∇
-    
+
     ∇ Default
-      :Access Public
-      :Implements Constructor
+     :Access Public
+     :Implements Constructor
+
+      :If 9≠⎕NC '#.APLProcess'
+          ∘∘∘
+          ⎕←'APLProcess class is not present - will not be unable to launch Blender'
+      :EndIf
+
+        
      
-      BlenderProc←⎕NEW #.APLProcess(''('--python-console --python "',ServerScript,'"')BlenderEXE)
-      ∘∘∘
     ∇
 
 :EndClass

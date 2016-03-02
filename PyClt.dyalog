@@ -59,7 +59,7 @@
 
     ∇ r←Eval expr;ns
       :Access Public Instance
-      (ns←⎕NS'').expr←expr
+      (ns←⎕NS'').expr←,expr
       :Trap 0 ⋄ r←'0'do toJSON ns
       :Else ⋄ ⎕SIGNAL DMX
       :EndTrap
@@ -71,7 +71,7 @@
     
     ∇ r←Exec expr;ns
       :Access Public Instance
-      (ns←⎕NS'').expr←expr
+      (ns←⎕NS'').expr←,expr
      
       :Trap 0 ⋄ r←'X'do toJSON ns
       :Else ⋄ ⎕SIGNAL DMX
