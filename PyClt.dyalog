@@ -5,11 +5,18 @@
     
     fromJSON←7159⌶ ⋄ toJSON←7160⌶
     
-    :Field Public Instance Host←'127.0.0.1'                     
+    :Field Public Instance Host←'127.0.0.1' 
+    :Field Public Instance TimeOut←10000 ⍝ 10 seconds                    
                       
     ∇ Default
       :Implements Constructor
       :Access Public
+    ∇
+
+    ∇ make1 port
+      :Implements Constructor
+      :Access Public
+      Connect port
     ∇
 
     ∇ Connect port;z
@@ -20,6 +27,8 @@
       :EndIf
      
       :If ~0=⊃z←#.DRC.Clt''Host port'Text'
+      :AndIf ~0=⊃z←#.DRC.Clt''Host port'Text'⊣⎕DL 1
+      :AndIf ~0=⊃z←#.DRC.Clt''Host port'Text'⊣⎕DL 3
           ('Unable to connect to PyServer on port ',(⍕port),': ',⍕z)⎕SIGNAL 11
       :Else
           CONN←2⊃z
@@ -29,7 +38,9 @@
     ∇ Close;z
       :Implements Destructor  
       :If 2=⎕NC'CONN'
-          z←#.DRC.Close CONN
+          :Trap 0
+              z←Quit
+          :EndTrap
       :EndIf
     ∇
                            
@@ -77,7 +88,12 @@
       :Else ⋄ ⎕SIGNAL DMX
       :EndTrap
     ∇
-    
+                    
+    ∇ r←Quit
+      :Access Public Instance     
+      r←'Q'do toJSON'Bye'
+    ∇
+
     ∇ r←cmd do json;z;done;ns;json;len
       ⍝ Execute a Python expression and return the result
      
@@ -89,7 +105,7 @@
      
       r←'' ⋄ len←¯1
       :Repeat
-          :Select ⊃z←#.DRC.Wait CONN
+          :Select ⊃z←#.DRC.Wait CONN TimeOut
           :Case 0   ⍝ Success
               :Select 3⊃z
               :Case 'Block' ⍝ That's what we want
@@ -101,6 +117,14 @@
                       :Case 'E' ⋄ ⎕SIGNAL⊂('EN' 11)('EM' 'Python Exception')('Message'(1↓r))
                       :CaseList '12' ⋄ r←1↓r
                       :EndSelect
+                  :EndIf
+              :Case 'Error'
+                  :If (cmd='Q')∧1105=4⊃z
+                      z←#.DRC.Close CONN
+                      ⎕EX'CONN'
+                      done←1
+                  :Else
+                      ∘∘∘
                   :EndIf
               :Else
                   ∘∘∘

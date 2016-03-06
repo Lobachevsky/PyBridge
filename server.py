@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
+TCPPort = 5000
 import socketserver, socket, sys, io, traceback, struct, json, threading
 
 class H(socketserver.BaseRequestHandler):
 
     PyBridgeContext={}
-        
+       
     def runit(self, cmd, h):
+        if cmd == 'Q': # end
+            sys.exit()
         try:
             ctx = self.PyBridgeContext
             if cmd == 'X':   # exec
@@ -22,6 +25,9 @@ class H(socketserver.BaseRequestHandler):
             result=self.serializeit(result)
             return(result)
         except:
+            if cmd == 'Q': # end
+                sys.exit()
+				
             result = "E" + traceback.format_exc()
             return(result)
 
@@ -35,12 +41,16 @@ class H(socketserver.BaseRequestHandler):
             return(r)
     
     def handle(self):
+        try:
+            MSG_WAITALL = socket.MSG_WAITALL
+        except:
+            MSG_WAITALL = 8 # work-around for bug in Windows Python Libs (5.4.2)
         while 1:
-            b = self.request.recv(8, socket.MSG_WAITALL)
+            b = self.request.recv(8, MSG_WAITALL)
             if not b: break
             n = struct.unpack('>Q', b)[0] # n:number of bytes in JSON string, big-endian 8-byte integer
-            cmd = str(self.request.recv(1, socket.MSG_WAITALL), 'utf8') # type of request
-            h = json.loads(str(self.request.recv(n, socket.MSG_WAITALL), 'utf8')) # h:parsed JSON string
+            cmd = str(self.request.recv(1, MSG_WAITALL), 'utf8') # type of request
+            h = json.loads(str(self.request.recv(n, MSG_WAITALL), 'utf8')) # h:parsed JSON string
             print('cmd: ' + cmd + ', h:' + repr(h))
             r = self.runit(cmd, h)			
             r = bytes(r, "utf8")
@@ -49,6 +59,14 @@ class H(socketserver.BaseRequestHandler):
             self.request.sendall(r)
 
     def main():
-        socketserver.TCPServer(('', 5000), H).serve_forever()
+        print('PyBridge listening on port '+str(TCPPort))
+        socketserver.TCPServer(('', TCPPort), H).serve_forever()
+
+try:
+    argv = sys.argv
+    argv = argv[argv.index("--") + 1:] # get args after "--"
+    TCPPort=int(argv[0])
+except:
+	traceback.print_exc()
 
 threading.Thread(target=H.main).start()

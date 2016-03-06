@@ -19,6 +19,14 @@
     ∇
     
     
+    ∇ Blender;z;bl;i
+      bl←⎕NEW #.Blender(5000 '"C:\Devt\Blender\Low Poly Rubber Duck.blend"')
+      z←bl.Exec'import bpy'
+      z←bl.Exec'duckie = bpy.data.objects["Duckie"]'
+      :For i :In ⍳5
+          z←{bl.Assign'duckie.rotation_euler[2]'⍵}¨0.01×⍳656
+      :EndFor
+    ∇
 
     assert←{'Assertion failed'⎕SIGNAL(⍵=0)/11}
 
