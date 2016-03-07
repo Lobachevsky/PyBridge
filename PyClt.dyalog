@@ -118,8 +118,8 @@
                       :CaseList '12' ⋄ r←1↓r
                       :EndSelect
                   :EndIf
-              :Case 'Error'
-                  :If (cmd='Q')∧1105=4⊃z
+              :CaseList 'BlockLast' 'Error'
+                  :If (cmd='Q')∧('BlockLast'≡3⊃z)∨1105≡4⊃z
                       z←#.DRC.Close CONN
                       ⎕EX'CONN'
                       done←1

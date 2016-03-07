@@ -28,6 +28,13 @@
       :EndFor
     ∇
 
+    ∇ Done
+      :Implements Destructor
+      :Trap 0
+          bl.Quit
+      :EndTrap
+    ∇
+
     assert←{'Assertion failed'⎕SIGNAL(⍵=0)/11}
 
       time←{⍺←⊣ ⋄ t←⎕AI[3]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 TCPPort = 5000
-import socketserver, socket, sys, io, traceback, struct, json, threading
+import socketserver, socket, sys, os, io, traceback, struct, json, threading
 
 class H(socketserver.BaseRequestHandler):
 
@@ -8,7 +8,7 @@ class H(socketserver.BaseRequestHandler):
        
     def runit(self, cmd, h):
         if cmd == 'Q': # end
-            sys.exit()
+            os._exit(0)
         try:
             ctx = self.PyBridgeContext
             if cmd == 'X':   # exec
@@ -24,10 +24,8 @@ class H(socketserver.BaseRequestHandler):
                 
             result=self.serializeit(result)
             return(result)
+			
         except:
-            if cmd == 'Q': # end
-                sys.exit()
-				
             result = "E" + traceback.format_exc()
             return(result)
 
